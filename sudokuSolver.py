@@ -1,89 +1,115 @@
 import time
 
-class Sudoku():
-  sudokuProblem = [
-        [7, 8, 0, 4, 0, 0, 1, 2, 0],
-        [6, 0, 0, 0, 7, 5, 0, 0, 9],
-        [0, 0, 0, 6, 0, 1, 0, 7, 8],
-        [0, 0, 7, 0, 4, 0, 2, 6, 0],
-        [0, 0, 1, 0, 5, 0, 9, 3, 0],
-        [9, 0, 4, 0, 6, 0, 0, 0, 5],
-        [0, 7, 0, 3, 0, 0, 0, 1, 2],
-        [1, 2, 0, 0, 0, 7, 4, 0, 0],
-        [0, 4, 9, 2, 0, 6, 0, 0, 7]
-    ]
+class Solution:
+    def __init__(self, board):
+        self.board = board
 
-def printBoard(board):
-  print("- - - - - - - - - - - - -")
-  for row in range(len(board)):
-    print('| ', end='')
-    for col in range(len(board[row])):
-      print(board[row][col], end = ' ')
-      if col % 3 == 2:
-        print('| ', end='')
-    print('')
-    if row % 3 == 2:
-      print("- - - - - - - - - - - - -")
+    def solveSudoku(self, row = 0, col = 0):
+        NextBlank = self.getNextBlank(row, col)
+        if (NextBlank == None):
+            return True
+        row, col = NextBlank
+        for guessNum in range(1, 10):
+            if (not self.isValid(row, col, str(guessNum))):
+                continue
+            self.board[row][col] = str(guessNum)
+#            -----print solve process-----------
+#            self.printBoard()
+#            time.sleep(0.1)
+            if self.solveSudoku(row, col):
+                return True
+            self.board[row][col] = "."
+        return False
 
-def inRow(board, guessRow, guessNum):
-  for col in board[guessRow]:
-    if col == guessNum:
-      return True
-  return False
+    def solveSudokuReverse(self, row = 0, col = 0):
+        NextBlank = self.getNextBlank(row, col)
+        if (NextBlank == None):
+            return True
+        row, col = NextBlank
+        for guessNum in range(9, 0, -1):
+            if (not self.isValid(row, col, str(guessNum))):
+                continue
+            self.board[row][col] = str(guessNum)
+#            -----print solve process-----------
+#            self.printBoard()
+#            time.sleep(0.1)
+            if self.solveSudokuReverse(row, col):
+                return True
+            self.board[row][col] = "."
+        return False
 
-def inCol(board, guessCol, guessNum):
-  for row in range(len(board)):
-    if board[row][guessCol] == guessNum:
-      return True
-  return False
+    def inRow(self, guessRow, guessNum):
+        for col in self.board[guessRow]:
+            if col == guessNum:
+                return True
+        return False
 
-def inBlock(board, row, col, guessNum):
-  startRow = row - row % 3
-  startCol = col - col % 3
-  for i in range(startRow, startRow + 3):
-    for j in range(startCol, startCol + 3):
-      if board[i][j] == guessNum:
+    def inCol(self, guessCol, guessNum):
+        for row in range(len(self.board)):
+            if self.board[row][guessCol] == guessNum:
+                return True
+        return False
+
+    def inBlock(self, row, col, guessNum):
+        startRow = row - row % 3
+        startCol = col - col % 3
+        for i in range(startRow, startRow + 3):
+            for j in range(startCol, startCol + 3):
+                if self.board[i][j] == guessNum:
+                    return True
+        return False
+
+    def isValid(self, row, col, guessNum):
+        if (self.inRow(row, guessNum)): return False
+        if (self.inCol(col, guessNum)): return False
+        if (self.inBlock(row, col, guessNum)): return False
         return True
-  return False
 
-def isValid(board, row, col, guessNum):
-  if (inRow(board, row, guessNum)): return False
-  if (inCol(board, col, guessNum)): return False
-  if (inBlock(board, row, col, guessNum)): return False
-  return True
+    def getNextBlank(self, row, col):
+        while (row < 9):
+            while (col < 9):
+                if self.board[row][col] == ".":
+                    return row, col
+                col += 1
+            col = 0
+            row += 1
+        return None
 
-def getNextBlank(board, row, col):
-  while (row < 9):
-    while (col < 9):
-      if board[row][col] == 0:
-        return row, col
-      col += 1
-    col = 0
-    row += 1
-  return None
-
-def solveSudoku(board, row = 0, col = 0):
-  NextBlank = getNextBlank(board, row, col)
-  if (NextBlank == None):
-    print("finish")
-    return True
-  row, col = NextBlank
-
-  for guessNum in range(1, 10):
-    if (not isValid(board, row, col, guessNum)):
-      continue
-    board[row][col] = guessNum
-    if solveSudoku(board, row, col):
-      return True
-    board[row][col] = 0
-  return False
-
+    def printBoard(self):
+        print("- - - - - - - - - - - - -")
+        for row in range(len(self.board)):
+            print('| ', end='')
+            for col in range(len(self.board[row])):
+                print(self.board[row][col], end = ' ')
+                if col % 3 == 2:
+                    print('| ', end='')
+            print('')
+            if row % 3 == 2:
+                print("- - - - - - - - - - - - -")
 def main():
-  startTime = time.time()
-  board = Sudoku.sudokuProblem
-  printBoard(board)
-  solveSudoku(board)
-  printBoard(board)
-  print("runtime: ", time.time()-startTime, "s")
-
+    startTime = time.time()
+    board = [
+            ["5","3",".",".","7",".",".",".","."],
+            ["6",".",".","1","9","5",".",".","."],
+            [".","9","8",".",".",".",".","6","."],
+            ["8",".",".",".","6",".",".",".","3"],
+            ["4",".",".","8",".","3",".",".","1"],
+            ["7",".",".",".","2",".",".",".","6"],
+            [".","6",".",".",".",".","2","8","."],
+            [".",".",".","4","1","9",".",".","5"],
+            [".",".",".",".","8",".",".","7","9"]
+            ]
+    boardRev = [x[:] for x in board]
+    sol = Solution(board)
+    sol.printBoard()
+    sol.solveSudoku()
+    sol.printBoard()
+    solRev = Solution(boardRev)
+    solRev.solveSudokuReverse()
+    solRev.printBoard()
+    if sol.board == solRev.board:
+        print("This problem has unique solution")
+    else:
+        print("This problem has multiple solution")
+    print("runtime: ", time.time()-startTime, "s")
 main()
